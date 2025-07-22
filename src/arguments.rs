@@ -24,7 +24,7 @@ pub struct Args {
     pub file: String,
 
     /// Search from left side or right
-    #[arg(short, long, value_enum, default_value_t = Mode::Left, ignore_case = true)]
+    #[arg(short, long, value_enum, default_value_t = Mode::All, ignore_case = true)]
     pub mode: Mode,
 
     /// Ignore case

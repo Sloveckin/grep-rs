@@ -61,7 +61,7 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                 let res = kmp.search_all(&target, &line);
 
                 if let Some(vec) = res {
-                    result.push(construct_line_all(&line, &target, vec, &args.show_config));
+                    result.push(construct_line_all(&line, pos, &target, vec, &args.show_config));
                 }
             }
         }

@@ -49,13 +49,17 @@ pub fn construct_reverse_line(line: String, line_ind: usize, show_config: &ShowC
 
 pub fn construct_line_all(
     s: &str,
+    line_ind: usize,
     pattern: &str,
     vec: Vec<(usize, usize)>,
     show_config: &ShowConfig,
 ) -> String {
     let mut result = String::with_capacity(s.len());
 
+    let func = get_update_functions(show_config, line_ind);
+    let mut result = update_string(result, func);
     let chars: Vec<char> = s.chars().collect();
+
 
     let mut i = 0;
     for pair in vec {
