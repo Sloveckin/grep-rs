@@ -57,15 +57,30 @@ impl Searcher for KnuthMorrisPratt {
     }
 
     fn reverse(&self, pattern: &str, source: &str) -> ReverseResult {
-        let prefix = pre_calc(pattern, source)?;
+
+        match pre_calc(pattern, source) {
+            Some(prefix) => {
+                for val in prefix {
+                    if val == pattern.len() {
+                        return false;
+                    }
+                }
+
+                true
+            },
+            None => false 
+        }
+
+
+        /*let prefix = pre_calc(pattern, source)?;
 
         for val in prefix {
             if val == pattern.len() {
-                return Some(false);
+                return false;
             }
         }
 
-        Some(true)
+        true*/
     }
 }
 

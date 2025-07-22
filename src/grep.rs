@@ -51,10 +51,8 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
             }
             Mode::Reverse => {
                 // Can I write more simple?
-                let res = kmp.reverse(&target, &line);
-
-                if res.is_some() && res.unwrap() {
-
+                if kmp.reverse(&target, &line) {
+                    result.push(construct_reverse_line(line, pos, &args.show_config));
                 }
             }
             Mode::All => {

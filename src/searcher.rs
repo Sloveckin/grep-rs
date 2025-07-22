@@ -1,6 +1,6 @@
 pub type SearchResult = Option<(usize, usize)>;
 pub type SearchResults = Option<Vec<(usize, usize)>>;
-pub type ReverseResult = Option<bool>;
+pub type ReverseResult = bool;
 
 pub trait Searcher {
     fn search_left(&self, pattern: &str, source: &str) -> SearchResult;
