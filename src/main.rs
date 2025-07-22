@@ -11,7 +11,9 @@ mod searcher;
 fn main() -> Result<(), std::io::Error> {
     let args = Args::parse();
 
-    for line in grep::grep(args)? {
+    let result = grep::grep(args)?;
+
+    for line in result {
         println!("{line}")
     }
 

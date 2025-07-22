@@ -6,7 +6,7 @@ use std::{
 use crate::{
     arguments::{Args, Mode},
     kmp,
-    printer::{construct_line, construct_reverse_line},
+    printer::{construct_line, construct_line_all, construct_reverse_line},
     searcher::Searcher,
 };
 
@@ -29,17 +29,25 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                 let res = kmp.search_left(&target, &line);
 
                 if let Some(pair) = res {
-                    result.push(construct_line(pair.0, pair.1, (pos, line), &args.show_config));
+                    result.push(construct_line(
+                        pair.0,
+                        pair.1,
+                        (pos, line),
+                        &args.show_config,
+                    ));
                 }
-
             }
             Mode::Right => {
                 let res = kmp.search_right(&target, &line);
 
                 if let Some(pair) = res {
-                    result.push(construct_line(pair.0, pair.1, (pos, line), &args.show_config));
+                    result.push(construct_line(
+                        pair.0,
+                        pair.1,
+                        (pos, line),
+                        &args.show_config,
+                    ));
                 }
-
             }
             Mode::Reverse => {
                 // Can I write more simple?
@@ -48,11 +56,17 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                 if res.is_some() && res.unwrap() {
                     result.push(construct_reverse_line(line, pos, &args.show_config));
                 }
-            },
-            Mode::All => panic!("Not implemented"),
+            }
+            Mode::All => {
+                let res = kmp.search_all(&target, &line);
+
+                if let Some(vec) = res {
+                    result.push(construct_line_all(&line, &target, vec, &args.show_config));
+                }
+            }
         }
     }
-    
+
     match !result.is_empty() {
         true => Ok(result),
         false => panic!(),
