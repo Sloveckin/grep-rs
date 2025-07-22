@@ -43,8 +43,6 @@ impl Searcher for KnuthMorrisPratt {
         let chars: Vec<char> = pattern.chars().collect();
         let mut result = Vec::new();
 
-        println!("{:?}", prefix);
-
         prefix[chars.len()..]
             .iter()
             .enumerate()

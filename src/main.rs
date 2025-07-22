@@ -10,7 +10,6 @@ mod searcher;
 
 fn main() -> Result<(), std::io::Error> {
     let args = Args::parse();
-
     let result = grep::grep(args)?;
 
     for line in result {
