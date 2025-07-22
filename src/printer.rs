@@ -60,19 +60,18 @@ pub fn construct_line_all(
     let mut result = update_string(result, func);
     let chars: Vec<char> = s.chars().collect();
 
-
     let mut i = 0;
     for pair in vec {
         while i < pair.0 {
-            result.push(chars[i]); 
+            result.push(chars[i]);
             i += 1;
-        } 
+        }
 
         result = result + &format!("{}", take_color(pattern, show_config.color));
 
         i = pair.1;
     }
-    
+
     while i < chars.len() {
         result.push(chars[i]);
         i += 1;

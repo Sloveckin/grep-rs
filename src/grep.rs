@@ -12,11 +12,8 @@ use crate::{
 
 pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
     let reader = io::BufReader::new(File::open(&args.file)?);
-
     let kmp = kmp::KnuthMorrisPratt::default();
-
     let data = get_update_functions(&args);
-
     let target = update_string(args.substring, &data);
 
     let mut result = Vec::new();
@@ -50,7 +47,6 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                 }
             }
             Mode::Reverse => {
-                // Can I write more simple?
                 if kmp.reverse(&target, &line) {
                     result.push(construct_reverse_line(line, pos, &args.show_config));
                 }
@@ -59,8 +55,13 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                 let res = kmp.search_all(&target, &line);
 
                 if let Some(vec) = res {
-                    println!("{line}, {:?}", vec);
-                    result.push(construct_line_all(&line, pos, &target, vec, &args.show_config));
+                    result.push(construct_line_all(
+                        &line,
+                        pos,
+                        &target,
+                        vec,
+                        &args.show_config,
+                    ));
                 }
             }
         }

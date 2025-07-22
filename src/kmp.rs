@@ -39,36 +39,25 @@ impl Searcher for KnuthMorrisPratt {
     }
 
     fn search_all(&self, pattern: &str, source: &str) -> SearchResults {
-        let v = pre_calc(pattern, source)?;
-
+        let prefix = pre_calc(pattern, source)?;
+        let chars: Vec<char> = pattern.chars().collect();
         let mut result = Vec::new();
 
-        v[pattern.len()..]
+        println!("{:?}", prefix);
+
+        prefix[chars.len()..]
             .iter()
             .enumerate()
-            .filter(|(_, val)| **val == pattern.len())
-            .for_each(|(ind, _)| result.push((ind - pattern.len(), ind)));
-        
-        if !result.is_empty() {
-            Some(result)
-        } else {
-            None
-        }
+            .filter(|(_, val)| **val == chars.len())
+            .for_each(|(ind, _)| result.push((ind - chars.len(), ind)));
+
+        Some(result)
     }
 
     fn reverse(&self, pattern: &str, source: &str) -> ReverseResult {
-
         match pre_calc(pattern, source) {
-            Some(prefix) => {
-                for val in prefix {
-                    if val == pattern.len() {
-                        return false;
-                    }
-                }
-
-                true
-            },
-            None => false 
+            Some(prefix) => !prefix.contains(&pattern.len()),
+            None => false,
         }
     }
 }
@@ -83,17 +72,20 @@ fn prefix(source: &str) -> Option<Vec<usize>> {
         return None;
     }
 
-    let mut result = vec![0; source.len()];
-    result[0] = 0;
+    let chars = source.chars().collect::<Vec<char>>();
 
-    for i in 1..source.len() {
+    println!("Chars = {:?}", chars);
+
+    let mut result = vec![0; chars.len()];
+
+    for i in 1..chars.len() {
         let mut k = result[i - 1];
 
-        while k > 0 && source.chars().nth(k as usize) != source.chars().nth(i) {
+        while k > 0 && chars[k] != chars[i] {
             k = result[k as usize - 1];
         }
 
-        if source.chars().nth(k as usize) == source.chars().nth(i) {
+        if chars[k] == chars[i] {
             k += 1;
         }
 
@@ -107,120 +99,84 @@ fn prefix(source: &str) -> Option<Vec<usize>> {
 mod tests {
     use super::*;
 
-    mod prefix_function {
-        use super::*;
-
-        #[test]
-        fn prefix0() {
-            let a = prefix("");
-            assert!(a.is_none());
-        }
-
-        #[test]
-        fn prefix1() {
-            let a = prefix("a");
-            assert!(a.is_none());
-        }
-
-        #[test]
-        fn prefix2() {
-            let result = prefix("abbab");
-
-            assert_eq!(result.unwrap(), [0, 0, 0, 1, 2]);
-        }
-
-        #[test]
-        fn prefix3() {
-            let result = prefix("abbababb");
-
-            assert_eq!(result.unwrap(), [0, 0, 0, 1, 2, 1, 2, 3]);
-        }
+    #[test]
+    fn empty_prefix() {
+        let a = prefix("");
+        assert!(a.is_none());
     }
 
-    mod kmp_test_left {
-        use super::*;
-
-        #[test]
-        fn test1() {
-            let kmp = KnuthMorrisPratt::default();
-            let result = kmp.search_left("aba", "abacaba");
-
-            assert!(result.is_some());
-            assert_eq!(result.unwrap(), (0, 3));
-        }
-
-        #[test]
-        fn test2() {
-            let kmp = KnuthMorrisPratt::default();
-            let result = kmp.search_left("aba", "aba");
-
-            assert!(result.is_some());
-            assert_eq!(result.unwrap(), (0, 3));
-        }
-
-        #[test]
-        #[ignore = "UTF-8 not working.."]
-        fn test3() {
-            let kmp = KnuthMorrisPratt::default();
-            let result = kmp.search_left("русский", "Ого, русский язык");
-
-            assert!(result.is_some());
-            assert_eq!(result.unwrap(), (5, 12));
-        }
+    #[test]
+    fn one_char_prefix() {
+        let a = prefix("a");
+        assert!(a.is_none());
     }
 
-    mod kmp_test_right {
-        use super::*;
+    #[test]
+    fn simple_prefix0() {
+        let result = prefix("abbab");
 
-        #[test]
-        fn test1() {
-            let kmp = KnuthMorrisPratt::default();
-            let result = kmp.search_right("aba", "abacaba");
-
-            assert!(result.is_some());
-            assert_eq!(result.unwrap(), (4, 7));
-        }
-
-        #[test]
-        fn test2() {
-            let kmp = KnuthMorrisPratt::default();
-            let result = kmp.search_right("aba", "aba");
-
-            assert!(result.is_some());
-            assert_eq!(result.unwrap(), (0, 3));
-        }
-
-        #[test]
-        #[ignore = "UTF-8 not working.."]
-        fn test3() {
-            let kmp = KnuthMorrisPratt::default();
-            let result = kmp.search_right("русский", "Ого, русский язык");
-
-            assert!(result.is_some());
-            assert_eq!(result.unwrap(), (5, 12));
-        }
+        assert_eq!(result.unwrap(), [0, 0, 0, 1, 2]);
     }
 
-    mod kmp_test_search_all {
+    #[test]
+    fn simple_prefix1() {
+        let result = prefix("abbababb");
 
-        use super::*;
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), [0, 0, 0, 1, 2, 1, 2, 3]);
+    }
 
-        #[test]
-        fn test1() {
-            let kmp = KnuthMorrisPratt::default();
-            let result = kmp.search_all("aba", "abacaba");
+    #[test]
+    fn left_aba_in_abacaba() {
+        let kmp = KnuthMorrisPratt::default();
+        let result = kmp.search_left("aba", "abacaba");
 
-            assert!(result.is_some());
-            assert_eq!(result.unwrap(), [(0, 3), (4, 7)]);
-        }
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), (0, 3));
+    }
 
-        #[test]
-        fn test2() {
-            let kmp = KnuthMorrisPratt::default();
-            let result = kmp.search_all("aba", "aba");
+    #[test]
+    fn left_aba_in_aba() {
+        let kmp = KnuthMorrisPratt::default();
+        let result = kmp.search_left("aba", "aba");
 
-            assert!(result.is_some());
-            assert_eq!(result.unwrap(), [(0, 3)]);
-        }
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), (0, 3));
+    }
+
+    #[test]
+    fn right_aba_in_abacaba() {
+        let kmp = KnuthMorrisPratt::default();
+        let result = kmp.search_right("aba", "abacaba");
+
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), (4, 7));
+    }
+
+    #[test]
+    fn right_aba_in_aba() {
+        let kmp = KnuthMorrisPratt::default();
+        let result = kmp.search_right("aba", "aba");
+
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), (0, 3));
+    }
+
+    #[test]
+    fn all_aba_in_abacaba() {
+        let kmp = KnuthMorrisPratt::default();
+        let result = kmp.search_all("aba", "abacaba");
+
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), [(0, 3), (4, 7)]);
+    }
+
+    #[test]
+    fn all_aba_in_aba() {
+        let kmp = KnuthMorrisPratt::default();
+        let result = kmp.search_all("aba", "aba");
+
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), [(0, 3)]);
     }
 }
