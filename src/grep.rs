@@ -54,13 +54,14 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                 let res = kmp.reverse(&target, &line);
 
                 if res.is_some() && res.unwrap() {
-                    result.push(construct_reverse_line(line, pos, &args.show_config));
+
                 }
             }
             Mode::All => {
                 let res = kmp.search_all(&target, &line);
 
                 if let Some(vec) = res {
+                    println!("{line}, {:?}", vec);
                     result.push(construct_line_all(&line, pos, &target, vec, &args.show_config));
                 }
             }

@@ -48,8 +48,12 @@ impl Searcher for KnuthMorrisPratt {
             .enumerate()
             .filter(|(_, val)| **val == pattern.len())
             .for_each(|(ind, _)| result.push((ind - pattern.len(), ind)));
-
-        Some(result)
+        
+        if !result.is_empty() {
+            Some(result)
+        } else {
+            None
+        }
     }
 
     fn reverse(&self, pattern: &str, source: &str) -> ReverseResult {

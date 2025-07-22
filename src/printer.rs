@@ -54,7 +54,7 @@ pub fn construct_line_all(
     vec: Vec<(usize, usize)>,
     show_config: &ShowConfig,
 ) -> String {
-    let mut result = String::with_capacity(s.len());
+    let result = String::with_capacity(s.len());
 
     let func = get_update_functions(show_config, line_ind);
     let mut result = update_string(result, func);
