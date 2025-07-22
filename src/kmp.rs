@@ -70,17 +70,6 @@ impl Searcher for KnuthMorrisPratt {
             },
             None => false 
         }
-
-
-        /*let prefix = pre_calc(pattern, source)?;
-
-        for val in prefix {
-            if val == pattern.len() {
-                return false;
-            }
-        }
-
-        true*/
     }
 }
 
