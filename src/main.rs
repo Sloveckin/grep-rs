@@ -1,20 +1,29 @@
+use std::process::ExitCode;
+
 use clap::Parser;
 
 use crate::arguments::Args;
 
 mod arguments;
 mod grep;
+mod grep_error;
 mod kmp;
 mod printer;
 mod searcher;
 
-fn main() -> Result<(), std::io::Error> {
+fn main() -> ExitCode {
     let args = Args::parse();
-    let result = grep::grep(args)?;
+    match grep::grep(args) {
+        Ok(line) => {
+            for line in line {
+                println!("{line}")
+            }
 
-    for line in result {
-        println!("{line}")
+            ExitCode::SUCCESS
+        }
+        Err(err) => {
+            err.display();
+            ExitCode::FAILURE
+        }
     }
-
-    Ok(())
 }
