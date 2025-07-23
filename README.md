@@ -26,7 +26,7 @@ Options:
 ```
  
  ### Example 1
-**arguments**: ``"aba" ./tmp/file1.txt --mode Left``
+**Arguments:" **``"aba" ./tmp/file1.txt --mode Left``
 **File**
 ```bash
 abacaba
@@ -35,4 +35,44 @@ aba hehe
 abacaba
 ```
 **Output**
+
 ![](/images/LeftExample.png "First")
+
+### Example 2
+**Arguments:" **``"aba" ./tmp/file1.txt --mode Right``
+**File**
+```bash
+abacaba
+notabacab
+aba hehe
+abacaba
+```
+**Output**
+
+![](/images/RightExample.png "Second")
+
+### Example 3
+**Arguments:" **``"aba" ./tmp/file1.txt --mode All``
+**File**
+```bash
+abacaba
+notabacab
+aba hehe
+abacaba
+```
+**Output**
+
+![](/images/AllExample.png "Third")
+
+### Example 4
+**Arguments:" **``"aba" ./tmp/file1.txt --mode Whole``
+**File**
+```bash
+abacaba
+notabacab
+aba hehe
+abacaba
+```
+**Output**
+
+![](/images/WholeExample.png "Fourth")
