@@ -6,6 +6,7 @@ use std::{
 
 use crate::{
     arguments::{Algo, Args, Mode},
+    grep_error::{ErrorType, GrepResult},
     kmp,
     printer::{construct_line, construct_line_all, construct_reverse_line},
     searcher::{SearchResult, Searcher},
@@ -20,36 +21,45 @@ struct DataHandler<'a> {
     searcher: Rc<dyn Searcher>,
 }
 
-pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
+pub fn grep(args: Args) -> GrepResult<Vec<String>> {
     match args.algo {
         Algo::Kmp => sub_grep(args, Rc::new(kmp::KnuthMorrisPratt::default())),
         Algo::BoyerMoore => panic!("not implemented yet"),
     }
 }
 
-fn sub_grep(args: Args, searcher: Rc<dyn Searcher>) -> Result<Vec<String>, std::io::Error> {
-    let reader = io::BufReader::new(File::open(&args.file)?);
-    let data = get_update_functions(&args);
-    let target = update_string(&args.substring, &data);
+fn sub_grep(args: Args, searcher: Rc<dyn Searcher>) -> GrepResult<Vec<String>> {
+    match File::open(&args.file) {
+        Ok(file) => {
+            let reader = io::BufReader::new(file);
+            let data = get_update_functions(&args);
+            let target = update_string(&args.substring, &data);
 
-    let mut result = Vec::new();
+            let mut result = Vec::new();
 
-    for (line_pos, line) in reader.lines().map_while(Result::ok).enumerate() {
-        let line = update_string(&line, &data);
+            for (line_pos, line) in reader.lines().map_while(Result::ok).enumerate() {
+                let line = update_string(&line, &data);
 
-        let mut data_handler = DataHandler {
-            target: &target,
-            line: &line,
-            line_pos,
-            result: &mut result,
-            args: &args,
-            searcher: searcher.clone(),
-        };
+                let mut data_handler = DataHandler {
+                    target: &target,
+                    line: &line,
+                    line_pos,
+                    result: &mut result,
+                    args: &args,
+                    searcher: searcher.clone(),
+                };
 
-        mode_handle(&mut data_handler);
+                mode_handle(&mut data_handler);
+            }
+
+            if result.is_empty() {
+                return Err(ErrorType::NotFound);
+            }
+
+            Ok(result)
+        }
+        Err(err) => Err(ErrorType::IOError(Rc::new(err))),
     }
-    
-    Ok(result)
 }
 
 fn mode_handle(data_handler: &mut DataHandler) {
@@ -115,7 +125,12 @@ fn handle_whole(data_handler: &mut DataHandler) {
 
     if let Some((l, r)) = res {
         if l == 0 && r == data_handler.line.len() {
-            let line = construct_line(l, r, (data_handler.line_pos, String::from(data_handler.line)),&data_handler.args.show_config);
+            let line = construct_line(
+                l,
+                r,
+                (data_handler.line_pos, String::from(data_handler.line)),
+                &data_handler.args.show_config,
+            );
             data_handler.result.push(line);
         }
     }
