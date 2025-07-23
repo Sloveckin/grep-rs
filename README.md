@@ -26,7 +26,7 @@ Options:
 ```
  
  ### Example 1
-**Arguments:" **``"aba" ./tmp/file1.txt --mode Left``
+**Arguments:**``"aba" ./tmp/file1.txt --mode Left``
 **File**
 ```bash
 abacaba
@@ -39,7 +39,7 @@ abacaba
 ![](/images/LeftExample.png "First")
 
 ### Example 2
-**Arguments:" **``"aba" ./tmp/file1.txt --mode Right``
+**Arguments:**``"aba" ./tmp/file1.txt --mode Right``
 **File**
 ```bash
 abacaba
@@ -52,7 +52,7 @@ abacaba
 ![](/images/RightExample.png "Second")
 
 ### Example 3
-**Arguments:" **``"aba" ./tmp/file1.txt --mode All``
+**Arguments:**``"aba" ./tmp/file1.txt --mode All``
 **File**
 ```bash
 abacaba
@@ -65,7 +65,7 @@ abacaba
 ![](/images/AllExample.png "Third")
 
 ### Example 4
-**Arguments:" **``"aba" ./tmp/file1.txt --mode Whole``
+**Arguments:**``"aba" ./tmp/file1.txt --mode Whole``
 **File**
 ```bash
 abacaba
