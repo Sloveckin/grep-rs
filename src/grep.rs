@@ -4,15 +4,21 @@ use std::{
 };
 
 use crate::{
-    arguments::{Args, Mode},
+    arguments::{Algo, Args, Mode},
     kmp,
     printer::{construct_line, construct_line_all, construct_reverse_line},
     searcher::Searcher,
 };
 
 pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
+    match args.algo {
+        Algo::Kmp => sub_grep(args, &kmp::KnuthMorrisPratt::default()),
+        Algo::BoyerMoore => panic!("not implemented yet"),
+    }
+}
+
+fn sub_grep(args: Args, algo: &impl Searcher) -> Result<Vec<String>, std::io::Error> {
     let reader = io::BufReader::new(File::open(&args.file)?);
-    let kmp = kmp::KnuthMorrisPratt::default();
     let data = get_update_functions(&args);
     let target = update_string(args.substring, &data);
 
@@ -23,7 +29,7 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
 
         match args.mode {
             Mode::Left => {
-                let res = kmp.search_left(&target, &line);
+                let res = algo.search_left(&target, &line);
 
                 if let Some(pair) = res {
                     result.push(construct_line(
@@ -35,7 +41,7 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                 }
             }
             Mode::Right => {
-                let res = kmp.search_right(&target, &line);
+                let res = algo.search_right(&target, &line);
 
                 if let Some(pair) = res {
                     result.push(construct_line(
@@ -47,12 +53,12 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                 }
             }
             Mode::Reverse => {
-                if kmp.reverse(&target, &line) {
+                if algo.reverse(&target, &line) {
                     result.push(construct_reverse_line(line, pos, &args.show_config));
                 }
             }
             Mode::All => {
-                let res = kmp.search_all(&target, &line);
+                let res = algo.search_all(&target, &line);
 
                 if let Some(vec) = res {
                     result.push(construct_line_all(
@@ -65,7 +71,7 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                 }
             }
             Mode::Whole => {
-                let res = kmp.search_left(&target, &line);
+                let res = algo.search_left(&target, &line);
 
                 if let Some((l, r)) = res {
                     if l == 0 && r == target.len() {
@@ -80,7 +86,10 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
         true => Ok(result),
         false => panic!(),
     }
+
 }
+
+
 
 fn update_string<F>(src: String, funcs: &[F]) -> String
 where

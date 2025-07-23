@@ -10,6 +10,12 @@ pub enum Mode {
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
+pub enum Algo {
+    Kmp,
+    BoyerMoore,
+}
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum Color {
     Green,
     Red,
@@ -27,6 +33,9 @@ pub struct Args {
     /// Search from left side or right
     #[arg(short, long, value_enum, default_value_t = Mode::All, ignore_case = true)]
     pub mode: Mode,
+
+    #[arg(short, long, value_enum, default_value_t = Algo::Kmp, ignore_case = true)]
+    pub algo: Algo,
 
     /// Ignore case
     #[arg(short, long)]
