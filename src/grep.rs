@@ -48,11 +48,8 @@ fn sub_grep(args: Args, searcher: Rc<dyn Searcher>) -> Result<Vec<String>, std::
 
         mode_handle(&mut data_handler);
     }
-
-    match !result.is_empty() {
-        true => Ok(result),
-        false => panic!(),
-    }
+    
+    Ok(result)
 }
 
 fn mode_handle(data_handler: &mut DataHandler) {
@@ -117,13 +114,9 @@ fn handle_whole(data_handler: &mut DataHandler) {
         .search_left(data_handler.target, data_handler.line);
 
     if let Some((l, r)) = res {
-        if l == 0 && r == data_handler.target.len() {
-            data_handler.result.push(construct_line(
-                l,
-                r,
-                (data_handler.line_pos, String::from(data_handler.line)),
-                &data_handler.args.show_config,
-            ));
+        if l == 0 && r == data_handler.line.len() {
+            let line = construct_line(l, r, (data_handler.line_pos, String::from(data_handler.line)),&data_handler.args.show_config);
+            data_handler.result.push(line);
         }
     }
 }
