@@ -14,11 +14,8 @@ mod searcher;
 fn main() -> ExitCode {
     let args = Args::parse();
     match grep::grep(args) {
-        Ok(line) => {
-            for line in line {
-                println!("{line}")
-            }
-
+        Ok(lines) => {
+            lines.iter().for_each(|line| println!("{line}"));
             ExitCode::SUCCESS
         }
         Err(err) => {
