@@ -41,8 +41,6 @@ impl Searcher for KnuthMorrisPratt {
     fn search_all(&self, pattern: &str, source: &str) -> SearchResults {
         let prefix = pre_calc(pattern, source)?;
 
-        println!("{:?}", prefix);
-
         let chars: Vec<char> = pattern.chars().collect();
         let mut result = Vec::new();
 
