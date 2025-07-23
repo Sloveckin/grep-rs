@@ -6,6 +6,7 @@ pub enum Mode {
     Right,
     All,
     Reverse,
+    Whole,
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]

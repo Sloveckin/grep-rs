@@ -64,6 +64,15 @@ pub fn grep(args: Args) -> Result<Vec<String>, std::io::Error> {
                     ));
                 }
             }
+            Mode::Whole => {
+                let res = kmp.search_left(&target, &line);
+
+                if let Some((l, r)) = res {
+                    if l == 0 && r == target.len() {
+                        result.push(construct_line(l, r, (pos, line), &args.show_config));
+                    }
+                }
+            }
         }
     }
 
