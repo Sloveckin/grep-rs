@@ -1,0 +1,25 @@
+name: grep-rs
+on: 
+  push:
+    branches: [main, tests]
+  pull_request:
+    branches: [main, tests]
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check linter 
+        run: cargo fmt --check
+  Test:
+    needs: [Build]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{matrix.os}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Test
+        run: cargo test --verbose
