@@ -12,7 +12,6 @@ impl KnuthMorrisPratt {
     fn search_core(&self, pattern: &str, source: &str, side: Side) -> SearchResult {
         let v = pre_calc(pattern, source)?;
 
-        // Copy-paste
         match side {
             Side::Left => v[pattern.len()..]
                 .iter()

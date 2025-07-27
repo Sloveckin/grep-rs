@@ -45,13 +45,18 @@ pub struct Args {
     pub show_config: ShowConfig,
 }
 
-
-impl Args {
+/*impl Args {
     pub fn new_with_default(substring: String, file: String) -> Self {
-        Args { substring, file, mode: Mode::All, algo: Algo::Kmp, ignore_case: true, show_config: ShowConfig::default() } 
+        Args {
+            substring,
+            file,
+            mode: Mode::All,
+            algo: Algo::Kmp,
+            ignore_case: true,
+            show_config: ShowConfig::default(),
+        }
     }
-}
-
+}*/
 
 #[derive(Parser, Debug, Clone, Copy)]
 pub struct ShowConfig {
@@ -68,6 +73,7 @@ pub struct ShowConfig {
     pub window_size: usize,
 }
 
+/*
 /// For testing
 impl Default for ShowConfig {
     fn default() -> Self {
@@ -77,4 +83,4 @@ impl Default for ShowConfig {
             window_size: 10,
         }
     }
-}
+}*/

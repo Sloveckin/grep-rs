@@ -108,6 +108,10 @@ fn handle_all(data_handler: &mut DataHandler) {
         .search_all(data_handler.target, data_handler.line);
 
     if let Some(vec) = res {
+        if vec.is_empty() {
+            return;
+        }
+
         data_handler.result.push(construct_line_all(
             data_handler.line,
             data_handler.line_pos,

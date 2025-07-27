@@ -30,7 +30,29 @@ mod tests {
     use std::io::Write;
     use tempfile::NamedTempFile;
 
-    use crate::{arguments::Args, grep};
+    use crate::{
+        arguments::{Algo, Args, Color, Mode, ShowConfig},
+        grep,
+    };
+
+    fn create_show_config() -> ShowConfig {
+        ShowConfig {
+            number: false,
+            color: Color::Red,
+            window_size: 10,
+        }
+    }
+
+    pub fn new_with_default(substring: String, file: String) -> Args {
+        Args {
+            substring,
+            file,
+            mode: Mode::All,
+            algo: Algo::Kmp,
+            ignore_case: true,
+            show_config: create_show_config(),
+        }
+    }
 
     fn create_wanted_string(vec: Vec<String>) -> String {
         vec.iter().fold(String::new(), |acc, v| acc + v)
@@ -50,7 +72,7 @@ mod tests {
         let substring = String::from("aba");
         fill_file(&mut file, vec!["aba", "abacaba"])?;
 
-        let args = Args::new_with_default(substring, file.path().to_str().unwrap().to_string());
+        let args = new_with_default(substring, file.path().to_str().unwrap().to_string());
 
         match grep::grep(args) {
             Ok(lines) => {
@@ -69,8 +91,201 @@ mod tests {
                 );
 
                 Ok(())
-            },
-            Err(_) => panic!("not expected branch")
+            }
+            Err(_) => panic!("not expected branch"),
+        }
+    }
+
+    #[test]
+    fn left_test() -> std::io::Result<()> {
+        let mut file = NamedTempFile::new()?;
+        let substring = String::from("aba");
+        fill_file(&mut file, vec!["aba", "abacaba"])?;
+
+        let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
+        args.mode = Mode::Left;
+
+        match grep::grep(args) {
+            Ok(lines) => {
+                assert_eq!(lines.len(), 2);
+
+                assert_eq!(
+                    lines[0],
+                    create_wanted_string(vec!["aba".red().to_string()])
+                );
+
+                assert_eq!(
+                    lines[1],
+                    create_wanted_string(vec![
+                        "aba".red().to_string(),
+                        "c".to_string(),
+                        "aba".to_string()
+                    ])
+                );
+
+                Ok(())
+            }
+            Err(_) => panic!("not expected branch"),
+        }
+    }
+
+    #[test]
+    fn right_test() -> std::io::Result<()> {
+        let mut file = NamedTempFile::new()?;
+        let substring = String::from("aba");
+        fill_file(&mut file, vec!["aba", "abacaba"])?;
+
+        let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
+        args.mode = Mode::Right;
+
+        match grep::grep(args) {
+            Ok(lines) => {
+                assert_eq!(lines.len(), 2);
+
+                assert_eq!(
+                    lines[0],
+                    create_wanted_string(vec!["aba".red().to_string()])
+                );
+
+                assert_eq!(
+                    lines[1],
+                    create_wanted_string(vec![
+                        "aba".to_string(),
+                        "c".to_string(),
+                        "aba".red().to_string()
+                    ])
+                );
+
+                Ok(())
+            }
+            Err(_) => panic!("not expected branch"),
+        }
+    }
+
+    #[test]
+    fn green_color() -> std::io::Result<()> {
+        let mut file = NamedTempFile::new()?;
+        let substring = String::from("aba");
+        fill_file(&mut file, vec!["aba", "abacaba"])?;
+
+        let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
+        args.show_config.color = Color::Green;
+
+        match grep::grep(args) {
+            Ok(lines) => {
+                assert_eq!(lines.len(), 2);
+
+                assert_eq!(
+                    lines[0],
+                    create_wanted_string(vec!["aba".green().to_string()])
+                );
+
+                assert_eq!(
+                    lines[1],
+                    create_wanted_string(vec![
+                        "aba".green().to_string(),
+                        "c".to_string(),
+                        "aba".green().to_string()
+                    ])
+                );
+
+                Ok(())
+            }
+            Err(_) => panic!("not expected branch"),
+        }
+    }
+
+    #[test]
+    fn blue_color() -> std::io::Result<()> {
+        let mut file = NamedTempFile::new()?;
+        let substring = String::from("aba");
+        fill_file(&mut file, vec!["aba", "abacaba"])?;
+
+        let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
+        args.show_config.color = Color::Blue;
+
+        match grep::grep(args) {
+            Ok(lines) => {
+                assert_eq!(lines.len(), 2);
+
+                assert_eq!(
+                    lines[0],
+                    create_wanted_string(vec!["aba".blue().to_string()])
+                );
+
+                assert_eq!(
+                    lines[1],
+                    create_wanted_string(vec![
+                        "aba".blue().to_string(),
+                        "c".to_string(),
+                        "aba".blue().to_string()
+                    ])
+                );
+
+                Ok(())
+            }
+            Err(_) => panic!("not expected branch"),
+        }
+    }
+
+    #[test]
+    fn with_number() -> std::io::Result<()> {
+        let mut file = NamedTempFile::new()?;
+        let substring = String::from("Hello");
+        fill_file(&mut file, vec!["hehe", "Hello, World", "Hello"])?;
+
+        let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
+        args.show_config.number = true;
+
+        match grep::grep(args) {
+            Ok(lines) => {
+                assert_eq!(lines.len(), 2);
+
+                // To lower case, because default flag for ignoring this = true
+                assert_eq!(
+                    lines[0],
+                    create_wanted_string(vec![
+                        "2:".to_string(),
+                        "hello".red().to_string(),
+                        ", world".to_string(),
+                    ])
+                );
+
+                assert_eq!(
+                    lines[1],
+                    create_wanted_string(vec!["3:".to_string(), "hello".red().to_string(),])
+                );
+
+                Ok(())
+            }
+            Err(_) => panic!("not expected error"),
+        }
+    }
+
+    #[test]
+    fn reverse() -> std::io::Result<()> {
+        let mut file = NamedTempFile::new()?;
+        let substring = String::from("no_line");
+        fill_file(
+            &mut file,
+            vec!["no_line", "this is true line", "a lot of text with no_line"],
+        )?;
+
+        let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
+        args.mode = Mode::Reverse;
+
+        match grep::grep(args) {
+            Ok(lines) => {
+                assert_eq!(lines.len(), 1);
+
+                assert_eq!(
+                    lines[0],
+                    create_wanted_string(vec!["this is true line".to_string()])
+                );
+
+                Ok(())
+            }
+            Err(_) => panic!("not expected branch"),
         }
     }
 }
