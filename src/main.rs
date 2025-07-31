@@ -26,8 +26,9 @@ fn main() -> ExitCode {
 
 #[cfg(test)]
 mod tests {
+
     use colored::Colorize;
-    use std::io::Write;
+    use std::{io::Write, vec};
     use tempfile::NamedTempFile;
 
     use crate::{
@@ -58,49 +59,20 @@ mod tests {
         vec.iter().fold(String::new(), |acc, v| acc + v)
     }
 
-    fn fill_file(file: &mut NamedTempFile, lines: Vec<&str>) -> std::io::Result<()> {
+    fn create_file(lines: Vec<&str>) -> NamedTempFile {
+        let mut file = NamedTempFile::new().unwrap();
+
         for line in lines {
-            writeln!(file, "{}", line)?;
+            writeln!(file, "{}", line).unwrap();
         }
 
-        Ok(())
+        file
     }
 
     #[test]
-    fn simple_test() -> std::io::Result<()> {
-        let mut file = NamedTempFile::new()?;
+    fn left_test() {
         let substring = String::from("aba");
-        fill_file(&mut file, vec!["aba", "abacaba"])?;
-
-        let args = new_with_default(substring, file.path().to_str().unwrap().to_string());
-
-        match grep::grep(args) {
-            Ok(lines) => {
-                assert_eq!(lines.len(), 2);
-                assert_eq!(
-                    lines[0],
-                    create_wanted_string(vec!["aba".red().to_string()])
-                );
-                assert_eq!(
-                    lines[1],
-                    create_wanted_string(vec![
-                        "aba".red().to_string(),
-                        "c".to_string(),
-                        "aba".red().to_string()
-                    ])
-                );
-
-                Ok(())
-            }
-            Err(_) => panic!("not expected branch"),
-        }
-    }
-
-    #[test]
-    fn left_test() -> std::io::Result<()> {
-        let mut file = NamedTempFile::new()?;
-        let substring = String::from("aba");
-        fill_file(&mut file, vec!["aba", "abacaba"])?;
+        let file = create_file(vec!["aba", "abacaba"]);
 
         let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
         args.mode = Mode::Left;
@@ -122,18 +94,15 @@ mod tests {
                         "aba".to_string()
                     ])
                 );
-
-                Ok(())
             }
             Err(_) => panic!("not expected branch"),
         }
     }
 
     #[test]
-    fn right_test() -> std::io::Result<()> {
-        let mut file = NamedTempFile::new()?;
+    fn right_test() {
         let substring = String::from("aba");
-        fill_file(&mut file, vec!["aba", "abacaba"])?;
+        let file = create_file(vec!["aba", "abacaba"]);
 
         let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
         args.mode = Mode::Right;
@@ -155,84 +124,87 @@ mod tests {
                         "aba".red().to_string()
                     ])
                 );
-
-                Ok(())
             }
             Err(_) => panic!("not expected branch"),
         }
     }
 
-    #[test]
-    fn green_color() -> std::io::Result<()> {
-        let mut file = NamedTempFile::new()?;
-        let substring = String::from("aba");
-        fill_file(&mut file, vec!["aba", "abacaba"])?;
+    fn test_color(
+        substring: String,
+        color_mode: Color,
+        file_data: Vec<&str>,
+        wanted: Vec<Vec<String>>,
+    ) {
+        let file = create_file(file_data);
 
         let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
-        args.show_config.color = Color::Green;
+        args.show_config.color = color_mode;
 
         match grep::grep(args) {
             Ok(lines) => {
-                assert_eq!(lines.len(), 2);
+                assert_eq!(lines.len(), wanted.len());
 
-                assert_eq!(
-                    lines[0],
-                    create_wanted_string(vec!["aba".green().to_string()])
-                );
-
-                assert_eq!(
-                    lines[1],
-                    create_wanted_string(vec![
-                        "aba".green().to_string(),
-                        "c".to_string(),
-                        "aba".green().to_string()
-                    ])
-                );
-
-                Ok(())
+                for i in 0..lines.len() {
+                    assert_eq!(lines[i], create_wanted_string(wanted[i].clone()))
+                }
             }
             Err(_) => panic!("not expected branch"),
         }
     }
 
     #[test]
-    fn blue_color() -> std::io::Result<()> {
-        let mut file = NamedTempFile::new()?;
-        let substring = String::from("aba");
-        fill_file(&mut file, vec!["aba", "abacaba"])?;
+    fn red_test() {
+        let first = vec!["aba".red().to_string()];
+        let second = vec![
+            "aba".red().to_string(),
+            "c".to_string(),
+            "aba".red().to_string(),
+        ];
 
-        let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
-        args.show_config.color = Color::Blue;
-
-        match grep::grep(args) {
-            Ok(lines) => {
-                assert_eq!(lines.len(), 2);
-
-                assert_eq!(
-                    lines[0],
-                    create_wanted_string(vec!["aba".blue().to_string()])
-                );
-
-                assert_eq!(
-                    lines[1],
-                    create_wanted_string(vec![
-                        "aba".blue().to_string(),
-                        "c".to_string(),
-                        "aba".blue().to_string()
-                    ])
-                );
-
-                Ok(())
-            }
-            Err(_) => panic!("not expected branch"),
-        }
+        test_color(
+            "aba".to_string(),
+            Color::Red,
+            vec!["aba", "abacaba"],
+            vec![first, second],
+        );
     }
 
     #[test]
-    fn with_number() -> std::io::Result<()> {
-        let mut file = NamedTempFile::new()?;
+    fn green_color() {
+        let first = vec!["aba".green().to_string()];
+        let second = vec![
+            "aba".green().to_string(),
+            "c".to_string(),
+            "aba".green().to_string(),
+        ];
+        test_color(
+            "aba".to_string(),
+            Color::Green,
+            vec!["aba", "abacaba"],
+            vec![first, second],
+        );
+    }
+
+    #[test]
+    fn blue_color() {
+        let first = vec!["aba".blue().to_string()];
+        let second = vec![
+            "aba".blue().to_string(),
+            "c".to_string(),
+            "aba".blue().to_string(),
+        ];
+        test_color(
+            "aba".to_string(),
+            Color::Blue,
+            vec!["aba", "abacaba"],
+            vec![first, second],
+        );
+    }
+
+    #[test]
+    fn with_number() {
         let substring = String::from("Hello");
-        fill_file(&mut file, vec!["hehe", "Hello, World", "Hello"])?;
+        let file = create_file(vec!["hehe", "Hello, World", "Hello"]);
 
         let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
         args.show_config.number = true;
@@ -255,21 +227,19 @@ mod tests {
                     lines[1],
                     create_wanted_string(vec!["3:".to_string(), "hello".red().to_string(),])
                 );
-
-                Ok(())
             }
             Err(_) => panic!("not expected error"),
         }
     }
 
     #[test]
-    fn reverse() -> std::io::Result<()> {
-        let mut file = NamedTempFile::new()?;
+    fn reverse() {
         let substring = String::from("no_line");
-        fill_file(
-            &mut file,
-            vec!["no_line", "this is true line", "a lot of text with no_line"],
-        )?;
+        let file = create_file(vec![
+            "no_line",
+            "this is true line",
+            "a lot of text with no_line",
+        ]);
 
         let mut args = new_with_default(substring, file.path().to_str().unwrap().to_string());
         args.mode = Mode::Reverse;
@@ -282,8 +252,6 @@ mod tests {
                     lines[0],
                     create_wanted_string(vec!["this is true line".to_string()])
                 );
-
-                Ok(())
             }
             Err(_) => panic!("not expected branch"),
         }
