@@ -45,6 +45,19 @@ pub struct Args {
     pub show_config: ShowConfig,
 }
 
+/*impl Args {
+    pub fn new_with_default(substring: String, file: String) -> Self {
+        Args {
+            substring,
+            file,
+            mode: Mode::All,
+            algo: Algo::Kmp,
+            ignore_case: true,
+            show_config: ShowConfig::default(),
+        }
+    }
+}*/
+
 #[derive(Parser, Debug, Clone, Copy)]
 pub struct ShowConfig {
     /// Show number of line
@@ -59,3 +72,15 @@ pub struct ShowConfig {
     #[arg(short, long, default_value = "10", ignore_case = true)]
     pub window_size: usize,
 }
+
+/*
+/// For testing
+impl Default for ShowConfig {
+    fn default() -> Self {
+        ShowConfig {
+            number: false,
+            color: Color::Red,
+            window_size: 10,
+        }
+    }
+}*/
