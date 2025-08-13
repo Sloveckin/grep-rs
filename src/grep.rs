@@ -18,17 +18,19 @@ struct DataHandler<'a> {
     line_pos: usize,
     result: &'a mut Vec<String>,
     args: &'a Args,
-    searcher: Rc<dyn Searcher>,
+    searcher: &'a dyn Searcher,
 }
 
 pub fn grep(args: Args) -> GrepResult<Vec<String>> {
-    match args.algo {
-        Algo::Kmp => sub_grep(args, Rc::new(kmp::KnuthMorrisPratt::default())),
-        Algo::BoyerMoore => panic!("not implemented yet"),
-    }
+    let searcher = match args.algo {
+        Algo::Kmp => kmp::KnuthMorrisPratt::default(),
+        Algo::BoyerMoore => panic!("hehehe"),
+    };
+
+    sub_grep(args, &searcher)
 }
 
-fn sub_grep(args: Args, searcher: Rc<dyn Searcher>) -> GrepResult<Vec<String>> {
+fn sub_grep(args: Args, searcher: &dyn Searcher) -> GrepResult<Vec<String>> {
     match File::open(&args.file) {
         Ok(file) => {
             let reader = io::BufReader::new(file);
@@ -46,7 +48,7 @@ fn sub_grep(args: Args, searcher: Rc<dyn Searcher>) -> GrepResult<Vec<String>> {
                     line_pos,
                     result: &mut result,
                     args: &args,
-                    searcher: searcher.clone(),
+                    searcher
                 };
 
                 mode_handle(&mut data_handler);
