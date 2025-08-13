@@ -48,7 +48,7 @@ fn sub_grep(args: Args, searcher: &dyn Searcher) -> GrepResult<Vec<String>> {
                     line_pos,
                     result: &mut result,
                     args: &args,
-                    searcher
+                    searcher,
                 };
 
                 mode_handle(&mut data_handler);
